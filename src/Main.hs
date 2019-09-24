@@ -51,10 +51,12 @@ type HOptic p s t a b = p a b ~> p s t
 
 newtype HForget r a b x = HForget { runHForget :: a x -> r x }
 
+hforgetMap :: (b ~> a) -> HForget r a x ~> HForget r b y
+hforgetMap f (HForget x) = HForget (x . f)
 
 instance HProfunctor (HForget r)
   where
-  hdimap f g (HForget x) = HForget (x . f)
+  hdimap f _ = hforgetMap f
 
 type HFold r s t a b = HOptic (HForget r) s t a b
 type HGetter s t a b = HFold a s t a b
@@ -112,7 +114,7 @@ asStateT = hdimap f g
     pure v
 
 withGlobalState :: MonadIO m => IORef a -> HGetter' (ReaderT (IORef a) m) m
-withGlobalState ioref (HForget f) = HForget (f . (\(ReaderT r) -> r ioref))
+withGlobalState ioref = hforgetMap (\(ReaderT r) -> r ioref)
 
 computation :: (MonadState String m, MonadIO m) => m ()
 computation = do
