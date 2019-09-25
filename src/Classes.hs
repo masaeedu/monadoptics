@@ -1,3 +1,4 @@
+{-# LANGUAGE QuantifiedConstraints #-}
 module Classes where
 
 import Types
@@ -29,11 +30,24 @@ class HProfunctor p => HDescending p
   where
   hwander :: (Functor s, Functor t, Functor a, Functor b) => (s ~> HFunList a b t) -> (p a b -> p s t)
 
-class HHFunctor f
+class (forall m. Monad m => Monad (f m)) => HHFunctor f
   where
-  hhfmap :: (a ~> b) -> f a ~> f b
+  hhfmap :: (Monad a, Monad b) => (a ~> b) -> f a ~> f b
 
-class HHApplicative f
+class HHFunctor f => HHApplicative f
   where
-  hhpure :: f ~> t f
-  hhliftA2 :: (f :*: g ~> h) -> (t f :*: t g ~> t h)
+  hhpure :: Monad a => a ~> f a
+  hhliftA2 :: (Monad a, Monad b, Monad c) => (a :*: b ~> c) -> (f a :*: f b ~> f c)
+
+class HHFunctor f => HHComposeative f
+  where
+  hhwrap :: Monad a => a ~> f a
+  hhstitch :: (Monad a, Monad b, Monad c) => (a :.: b ~> c) -> (f a :.: f b ~> f c)
+
+class HHFunctor t => HHTraversable t
+  where
+  hhtraverse :: (Monad a, Monad b, HHApplicative f) => (a ~> f b) -> (t a ~> f (t b))
+
+class HHFunctor t => HHDescendable t
+  where
+  hhdescend :: (Monad a, Monad b, HHComposeative f) => (a ~> f b) -> (t a ~> f (t b))

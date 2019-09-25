@@ -3,10 +3,13 @@ module Instances where
 import Data.Bifunctor
 import Data.Functor.Compose
 
+import Control.Monad.Free
+
 import Types
 import Classes
 import FunList
 
+-- Profunctors
 instance HProfunctor (:~>)
   where
   hdimap f g (Nat x) = Nat $ g . x . f
@@ -41,3 +44,8 @@ instance HProfunctor (HCIso a b)
 instance HProfunctor p => HProfunctor (HReverse p s t)
   where
   hdimap f g (HReverse r) = HReverse (r . hdimap g f)
+
+-- HHThings
+instance HHFunctor Free
+  where
+  hhfmap = hoistFree
