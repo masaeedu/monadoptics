@@ -20,7 +20,7 @@ type HOptic (p :: (* -> *) -> (* -> *) -> *) s t a b = p a b -> p s t
 type HIso       s t a b = forall p. HProfunctor  p  => HOptic p s t a b
 type HLens      s t a b = forall p. HStrong      p  => HOptic p s t a b
 type HPrism     s t a b = forall p. HChoice      p  => HOptic p s t a b
-type HTraversal s t a b = forall p. HTraversing  p  => HOptic p s t a b
+type HDescent   s t a b = forall p. HDescending  p  => HOptic p s t a b
 type HFold    r s t a b = HOptic (HForget r) s t a b
 type HGetter    s t a b = HFold a s t a b
 type HSetter    s t a b = HOptic (:~>) s t a b
@@ -46,7 +46,7 @@ hlens view put = hdimap (\s -> Product $ (view s, s)) put . hfirst
 hprism :: (b ~> t) -> (s ~> (a :+: t)) -> HPrism s t a b
 hprism build match = hdimap match (either build id . runSum) . hleft
 
-each :: (Functor a, Functor b) => HTraversal (Free a) (Free b) a b
+each :: (Functor a, Functor b) => HDescent (Free a) (Free b) a b
 each pab = hwander go pab
   where
   go f = HFunList ((\(SomeHVec x) -> unsafeCoerce x) $ buildHVec f) foldHVec

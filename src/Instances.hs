@@ -1,6 +1,7 @@
 module Instances where
 
 import Data.Bifunctor
+import Data.Functor.Compose
 
 import Types
 import Classes
@@ -18,7 +19,11 @@ instance HChoice (:~>)
   where
   hleft (Nat f) = Nat $ \(Sum x) -> Sum $ bimap f id x
 
-instance HTraversing (:~>)
+instance HComposing (:~>)
+  where
+  houtside (Nat f) = Nat $ \(Compose x) -> Compose $ f $ x
+
+instance HDescending (:~>)
   where
   hwander t pab = Nat $ (\(HFunList contents fill) -> fill $ mapHVec (runNat pab) $ contents) . t
 

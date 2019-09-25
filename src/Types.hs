@@ -1,5 +1,7 @@
 module Types where
 
+import Data.Functor.Compose
+
 type F = (* -> *)
 type HP = F -> F -> *
 
@@ -12,6 +14,8 @@ type Product = (:*:)
 
 newtype (f :+: g) a = Sum { runSum :: Either (f a) (g a) }
 type Sum = (:+:)
+
+type (:.:) = Compose
 
 data Nat = Z | S Nat
 
