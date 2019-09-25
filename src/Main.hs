@@ -102,7 +102,6 @@ test2 = do
   -- > Push 4
   -- > Add 4 to 3
   -- > Top: 7
-  -- > Pop
   -- > Done!
 
   checkIORef x
@@ -116,7 +115,6 @@ test2 = do
   -- > Push 8
   -- > Add 8 to 6
   -- > Top: 14
-  -- > Pop
   -- > Done!
 
   checkIORef x
