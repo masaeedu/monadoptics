@@ -16,35 +16,11 @@ import Instances
 import Optics
 import FunList
 
--- split :: (x -> Product f g r) -> (x -> f r, x -> g r)
--- split f = (\x -> fst $ runProduct $ f x, \x -> snd $ runProduct $ f x)
---
--- newtype ContT r m n a = ContT { runContT :: Monoid a => (a -> m r) -> n r }
---
--- instance HProfunctor (ContT r) where
---   hdimap fg hi r = ContT $ \k -> hi $ runContT r (fg . k)
---
--- instance HStrong (ContT r)
---   where
---   hfirst (ContT f) = ContT $ \cb -> let (l, r) = split cb in Product (f l, r mempty)
---
--- tilps :: Either (x -> f r) (x -> g r) -> (x -> Sum f g r)
--- tilps (Left f ) x = Sum $ Left  $ f x
--- tilps (Right f) x = Sum $ Right $ f x
---
--- instance HChoice (ContT r)
---   where
---   hleft (ContT f) = ContT $ \cb -> Sum $ Left $ f (either id _ . runSum . cb)
-
--- instance HProfunctor (HCLens a b)
---   where
---   hdimap f g (HCLens v p) = HCLens _ _
-
 -- Test
 
 -- Try running an abstract stateful computation using global state
-asStateT :: MonadIO m => HIso (ReaderT (IORef a) m) (ReaderT (IORef b) m) (StateT a m) (StateT b m)
-asStateT = hdimap f g
+readerTAsStateT :: MonadIO m => HIso (ReaderT (IORef a) m) (ReaderT (IORef b) m) (StateT a m) (StateT b m)
+readerTAsStateT = hdimap f g
   where
   f (ReaderT m) = StateT $ \s -> do
     ioref <- liftIO $ newIORef s
@@ -57,6 +33,9 @@ asStateT = hdimap f g
     (v, s1) <- m s
     liftIO $ writeIORef ioref s1
     pure v
+
+stateTAsReaderT :: MonadIO m => HIso (StateT a m) (StateT b m) (ReaderT (IORef a) m) (ReaderT (IORef b) m)
+stateTAsReaderT = hreverse readerTAsStateT
 
 each :: (Functor a, Functor b) => HTraversal (Free a) (Free b) a b
 each pab = hwander go pab
@@ -130,7 +109,7 @@ main :: IO ()
 main = do
   -- test 1
   ior <- newIORef ""
-  hview (hreverse asStateT . withGlobalState ior) test1
+  hview (stateTAsReaderT . withGlobalState ior) test1
   readIORef ior >>= print
   -- > "foo"
   -- > "this stuff is left over!"
