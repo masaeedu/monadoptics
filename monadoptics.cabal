@@ -8,12 +8,15 @@ build-type:          Simple
 extra-source-files:  CHANGELOG.md
 
 library
-  build-depends:       base >=4.12 && <4.13, mtl
+  build-depends:       base >=4.12 && <4.13, mtl, free
+  default-extensions:  RankNTypes, TypeOperators, MultiParamTypeClasses, ScopedTypeVariables, DataKinds, GADTs, KindSignatures
   hs-source-dirs:      src
   default-language:    Haskell2010
+  exposed-modules:     Types, Classes, Instances, Optics
 
 executable monadoptics
   main-is:             Main.hs
-  build-depends:       base >=4.12 && <4.13, mtl
+  build-depends:       base >=4.12 && <4.13, mtl, free
+  default-extensions:  RankNTypes, TypeOperators, MultiParamTypeClasses, ScopedTypeVariables, DataKinds, GADTs, KindSignatures
   hs-source-dirs:      src
   default-language:    Haskell2010
