@@ -1,8 +1,5 @@
 module Classes where
 
-import Data.Bifunctor
-import Data.Functor.Compose
-
 import Types
 
 class HProfunctor p
