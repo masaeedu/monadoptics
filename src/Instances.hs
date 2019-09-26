@@ -3,6 +3,8 @@ module Instances where
 import Data.Bifunctor
 import Data.Functor.Compose
 
+import Control.Monad
+
 import Control.Monad.Free
 
 import Types
@@ -28,7 +30,7 @@ instance HComposing (:~>)
 
 instance HDescending (:~>)
   where
-  hwander t pab = Nat $ (\(HFunList contents fill) -> fill $ mapHVec (runNat pab) $ contents) . t
+  hspelunk t pab = Nat $ (\(HFunList contents fill) -> fill $ mapHVec (runNat pab) $ contents) . t
 
 hforgetMap :: (b ~> a) -> HForget r a x -> HForget r b y
 hforgetMap f (HForget x) = HForget (x . f)
@@ -49,3 +51,8 @@ instance HProfunctor p => HProfunctor (HReverse p s t)
 instance HHFunctor Free
   where
   hhfmap = hoistFree
+
+instance HHDescendable Free
+  where
+  hhdescend f (Pure a) = hhwrap $ Pure a
+  hhdescend f (Free a) = hhstitch (Free . getCompose) (Compose $ f $ hhdescend f <$> a)

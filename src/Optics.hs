@@ -47,7 +47,7 @@ hprism :: (b ~> t) -> (s ~> (a :+: t)) -> HPrism s t a b
 hprism build match = hdimap match (either build id . runSum) . hleft
 
 each :: (Functor a, Functor b) => HDescent (Free a) (Free b) a b
-each pab = hwander go pab
+each pab = hspelunk go pab
   where
   go f = HFunList ((\(SomeHVec x) -> unsafeCoerce x) $ buildHVec f) foldHVec
 
