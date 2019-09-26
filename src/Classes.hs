@@ -30,7 +30,7 @@ class HProfunctor p => HDescending p
   where
   hspelunk :: (Functor s, Functor t, Functor a, Functor b) => (s ~> HFunList a b t) -> (p a b -> p s t)
 
-class (forall m. Functor m => Functor (f m)) => HHFunctor f
+class HHFunctor f
   where
   hhfmap :: (Functor a, Functor b) => (a ~> b) -> f a ~> f b
 

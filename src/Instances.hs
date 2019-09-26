@@ -1,10 +1,11 @@
+{-# LANGUAGE TupleSections #-}
+
 module Instances where
 
 import Data.Bifunctor
 import Data.Functor.Compose
 
-import Control.Monad
-
+import Control.Monad.State
 import Control.Monad.Free
 
 import Types
@@ -56,3 +57,16 @@ instance HHDescendable Free
   where
   hhdescend f (Pure a) = hhwrap $ Pure a
   hhdescend f (Free a) = hhstitch (Free . getCompose) (Compose $ f $ hhdescend f <$> a)
+
+instance HHFunctor (StateT s)
+  where
+  hhfmap f (StateT mx) = StateT $ \s -> f $ mx s
+
+instance HHComposative (StateT s)
+  where
+  hhwrap mx = StateT $ \s -> (, s) <$> mx
+  hhstitch f mmx = StateT $ f' . fmap (uncurry ($)) . mmx'
+    where
+    -- remove all newtypes from inputs
+    f' = f . Compose
+    mmx' = (fmap . fmap . first) runStateT . runStateT $ getCompose $ mmx
