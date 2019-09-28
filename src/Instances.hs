@@ -21,6 +21,24 @@ instance KnownNat n => KnownNat (S n)
   where
   knownNat = SS knownNat
 
+instance Functor f => Functor (HVec n f)
+  where
+  fmap f (HNil x) = HNil $ f x
+  fmap f (HCons fr) = HCons $ fmap f <$> fr
+
+instance HHFunctor (HVec n)
+  where
+  hhfmap f (HNil x) = HNil x
+  hhfmap f (HCons fr) = HCons $ f $ hhfmap f <$> fr
+
+instance Functor t => Functor (HFunList a b t)
+  where
+  fmap f (HFunList contents fill) = HFunList contents (fmap f . fill)
+
+instance HHFunctor (HFunList a b)
+  where
+  hhfmap f (HFunList contents fill) = HFunList contents (f . fill)
+
 -- Profunctors
 instance HProfunctor (:~>)
   where
@@ -40,7 +58,7 @@ instance HComposing (:~>)
 
 instance HDescending (:~>)
   where
-  hspelunk t pab = Nat $ (\(HFunList contents fill) -> fill $ mapHVec (runNat pab) $ contents) . t
+  hspelunk t pab = Nat $ (\(HFunList contents fill) -> fill $ hhfmap (runNat pab) $ contents) . t
 
 hforgetMap :: (b ~> a) -> HForget r a x -> HForget r b y
 hforgetMap f (HForget x) = HForget (x . f)
