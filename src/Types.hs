@@ -35,7 +35,7 @@ data SomeHVec f a
 
 data HFunList a b t x
   where
-  HFunList :: HVec n a x -> (HVec n b x -> t x) -> HFunList a b t x
+  HFunList :: HVec n a r -> (HVec n b r -> t x) -> HFunList a b t x
 
 data HForget :: F -> HP
   where
