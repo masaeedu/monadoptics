@@ -75,7 +75,6 @@ withGlobal v = hforgetMap (\(ReaderT r) -> r v)
 inIORef :: MonadIO m => IORef s -> HGetter' (StateT s m) m
 inIORef ior = stateTAsReaderT . withGlobal ior
 
-
 _1 :: HLens ((,) a) ((,) b) (Const a) (Const b)
 _1 = hlens (Const . uncurry const) (\(Product (Const b, (_, x))) -> (b, x))
 
