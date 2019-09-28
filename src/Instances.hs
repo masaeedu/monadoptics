@@ -12,6 +12,15 @@ import Types
 import Classes
 import FunList
 
+-- Funlists
+instance KnownNat Z
+  where
+  knownNat = SZ
+
+instance KnownNat n => KnownNat (S n)
+  where
+  knownNat = SS knownNat
+
 -- Profunctors
 instance HProfunctor (:~>)
   where

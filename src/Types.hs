@@ -19,6 +19,11 @@ type (:.:) = Compose
 
 data Nat = Z | S Nat
 
+data SNat n
+  where
+  SZ :: SNat Z
+  SS :: SNat n -> SNat (S n)
+
 data HVec n f a
   where
   HNil :: a -> HVec Z f a

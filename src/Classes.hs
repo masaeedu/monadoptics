@@ -3,6 +3,10 @@ module Classes where
 
 import Types
 
+class KnownNat n
+  where
+  knownNat :: SNat n
+
 class HProfunctor p
   where
   hdimap :: (a' ~> a) -> (b ~> b') -> p a b -> p a' b'
