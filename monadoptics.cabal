@@ -7,16 +7,16 @@ build-type:          Simple
 extra-source-files:  CHANGELOG.md
 
 library
-  build-depends:       base >=4.12 && <4.13, mtl, free
-  default-extensions:  RankNTypes, TypeOperators, MultiParamTypeClasses, ScopedTypeVariables, DataKinds, PolyKinds, KindSignatures, GADTs, FlexibleInstances
+  build-depends:       base >=4.12 && <4.13, mtl, free, comonad
+  default-extensions:  RankNTypes, TypeOperators, MultiParamTypeClasses, ScopedTypeVariables, DataKinds, PolyKinds, KindSignatures, GADTs, FlexibleInstances, FlexibleContexts
   hs-source-dirs:      src
   default-language:    Haskell2010
   exposed-modules:     Types, Classes, Instances, Optics
 
 executable monadoptics
   main-is:             Main.hs
-  build-depends:       base >=4.12 && <4.13, mtl, free
-  default-extensions:  RankNTypes, TypeOperators, MultiParamTypeClasses, ScopedTypeVariables, DataKinds, PolyKinds, KindSignatures, GADTs, FlexibleInstances
+  build-depends:       base >=4.12 && <4.13, mtl, free, comonad
+  default-extensions:  RankNTypes, TypeOperators, MultiParamTypeClasses, ScopedTypeVariables, DataKinds, PolyKinds, KindSignatures, GADTs, FlexibleInstances, FlexibleContexts
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wunused-imports

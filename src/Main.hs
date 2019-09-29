@@ -1,11 +1,18 @@
-{-# LANGUAGE FlexibleContexts, DeriveFunctor, LambdaCase #-}
+{-# LANGUAGE FlexibleContexts, DeriveFunctor, LambdaCase, TypeApplications #-}
 module Main where
 
 import Data.IORef
 import Data.Function
+import Data.Coerce
 
+import Data.Functor.Compose
+
+import Control.Comonad
+
+import Control.Monad.Identity
 import Control.Monad.Fail
 import Control.Monad.Reader
+import Control.Monad.Writer hiding (Sum)
 import Control.Monad.State
 import Control.Monad.Free
 
@@ -119,6 +126,21 @@ test2 = do
 
   checkIORef x
   -- > [14, 7]
+
+myRWST :: (MonadReader String m, MonadWriter String m, MonadState String m) => m String
+myRWST = do
+  r <- ask
+  tell "w"
+  modify (++ "'")
+  pure (r ++ "esult")
+
+-- foo :: String -> String -> Identity (String, (String, String))
+-- foo = coerce $ hview test myRWST
+
+-- test3 :: IO ()
+-- test3 = do
+--   runReaderT'' . hinside . runWriterT'' $ myRWST
+
 
 main :: IO ()
 main = do

@@ -11,9 +11,6 @@ class HProfunctor p
   where
   hdimap :: (a' ~> a) -> (b ~> b') -> p a b -> p a' b'
 
-class HBifunctor t where
-  hbimap :: (a ~> b) -> (c ~> d) -> t a c ~> t b d
-
 class HProfunctor p => HStrong p where
   hfirst :: p f g -> p (f :*: h) (g :*: h)
 
@@ -26,9 +23,13 @@ class HProfunctor p => HChoice p where
 class HProfunctor p => HCochoice p where
   hunleft :: p (f :+: h) (g :+: h) -> p f g
 
-class HProfunctor p => HComposing p
+class HProfunctor p => HLeftComposing p
   where
-  houtside :: (Functor a, Functor b) => p a b -> p (a :.: f) (b :.: f)
+  houtside :: (Functor a, Functor b, Functor f) => p a b -> p (a :.: f) (b :.: f)
+
+class HProfunctor p => HRightComposing p
+  where
+  hinside :: (Functor a, Functor b, Functor f) => p a b -> p (f :.: a) (f :.: b)
 
 class HProfunctor p => HDescending p
   where
@@ -55,3 +56,7 @@ class HHFunctor t => HHTraversable t
 class HHFunctor t => HHDescendable t
   where
   hhdescend :: (Functor a, Functor b, HHComposative f) => (a ~> f b) -> (t a ~> f (t b))
+
+class (forall a. Functor a => HHFunctor (t a)) => HHBifunctor t
+  where
+  hhbimap :: (Functor a, Functor b, Functor c, Functor d) => (a ~> b) -> (c ~> d) -> t a c ~> t b d

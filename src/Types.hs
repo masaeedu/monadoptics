@@ -6,6 +6,7 @@ type F = (* -> *)
 type HP = F -> F -> *
 
 type (~>) f g = forall x. f x -> g x
+infixr 1 ~>
 
 newtype (f :~> g) = Nat { runNat :: forall x. f x -> g x }
 
@@ -16,6 +17,7 @@ newtype (f :+: g) a = Sum { runSum :: Either (f a) (g a) }
 type Sum = (:+:)
 
 type (:.:) = Compose
+infixr :.:
 
 data Nat = Z | S Nat
 
