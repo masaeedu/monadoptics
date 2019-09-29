@@ -26,18 +26,18 @@ data SNat n
   SZ :: SNat Z
   SS :: SNat n -> SNat (S n)
 
-data HVec n f a
+data Onion n f a
   where
-  HNil :: a -> HVec Z f a
-  HCons :: f (HVec n f a) -> HVec (S n) f a
+  Core :: { reveal :: a } -> Onion Z f a
+  Layer :: { peel :: f (Onion n f a) } -> Onion (S n) f a
 
-data SomeHVec f a
+data SomeOnion f a
   where
-  SomeHVec :: HVec n f a -> SomeHVec f a
+  SomeOnion :: Onion n f a -> SomeOnion f a
 
 data HFunList a b t x
   where
-  HFunList :: HVec n a r -> (HVec n b r -> t x) -> HFunList a b t x
+  HFunList :: Onion n a r -> (Onion n b r -> t x) -> HFunList a b t x
 
 data HForget :: F -> HP
   where

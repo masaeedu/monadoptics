@@ -72,7 +72,7 @@ hLiftIso f b i j = hdimap (hover f $ hview i) (hover b $ hview $ j)
 each :: (Functor a, Functor b) => HDescent (Free a) (Free b) a b
 each pab = hspelunk go pab
   where
-  go f = HFunList ((\(SomeHVec x) -> unsafeCoerce x) $ buildHVec f) foldHVec
+  go f = HFunList ((\(SomeOnion x) -> unsafeCoerce x) $ freeToOnion f) onionToFree
 
 readerTAsStateT :: MonadIO m => HIso (ReaderT (IORef a) m) (ReaderT (IORef b) m) (StateT a m) (StateT b m)
 readerTAsStateT = hdimap f g

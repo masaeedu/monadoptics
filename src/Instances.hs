@@ -23,7 +23,7 @@ instance HHBifunctor Compose
   where
   hhbimap f g (Compose fgx) = Compose $ f $ fmap g $ fgx
 
--- HVec
+-- Onion
 instance KnownNat Z
   where
   knownNat = SZ
@@ -32,21 +32,21 @@ instance KnownNat n => KnownNat (S n)
   where
   knownNat = SS knownNat
 
-instance Functor (HVec Z f)
+instance Functor (Onion Z f)
   where
-  fmap f (HNil x) = HNil $ f x
+  fmap f (Core x) = Core $ f x
 
-instance (Functor f, Functor (HVec n f)) => Functor (HVec (S n) f)
+instance (Functor f, Functor (Onion n f)) => Functor (Onion (S n) f)
   where
-  fmap f (HCons fr) = HCons $ fmap f <$> fr
+  fmap f (Layer fr) = Layer $ fmap f <$> fr
 
-instance HHFunctor (HVec n)
+instance HHFunctor (Onion n)
   where
-  hhfmap f (HNil x) = HNil x
-  hhfmap f (HCons fr) = HCons $ f $ hhfmap f <$> fr
+  hhfmap f (Core x) = Core x
+  hhfmap f (Layer fr) = Layer $ f $ hhfmap f <$> fr
 
 -- HFunList
-deriving instance (forall x. Show x => Show (f x), Show a) => Show (HVec n f a)
+deriving instance (forall x. Show x => Show (f x), Show a) => Show (Onion n f a)
 
 instance Functor t => Functor (HFunList a b t)
   where

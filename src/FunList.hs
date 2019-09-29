@@ -1,18 +1,20 @@
 module FunList where
 
+import Prelude hiding (replicate)
+
 import Unsafe.Coerce
 import Control.Monad.Free
 
 import Types
 
-replicateHVec :: Functor f => SNat n -> f ~> HVec (S n) f
-replicateHVec SZ     fx  = HCons $ HNil <$> fx
-replicateHVec (SS n) fx = HCons $ (const $ replicateHVec n fx) <$> fx
+replicate :: Functor f => SNat n -> f ~> Onion (S n) f
+replicate SZ     fx  = Layer $ Core <$> fx
+replicate (SS n) fx = Layer $ (const $ replicate n fx) <$> fx
 
-buildHVec :: Functor f => Free f a -> SomeHVec f a
-buildHVec (Pure a) = SomeHVec $ HNil a
-buildHVec (Free fa) = SomeHVec $ HCons $ ((\(SomeHVec x) -> unsafeCoerce x) . buildHVec <$> fa)
+freeToOnion :: Functor f => Free f a -> SomeOnion f a
+freeToOnion (Pure a) = SomeOnion $ Core a
+freeToOnion (Free fa) = SomeOnion $ Layer $ ((\(SomeOnion x) -> unsafeCoerce x) . freeToOnion <$> fa)
 
-foldHVec :: Functor f => HVec n f a -> Free f a
-foldHVec (HNil a) = Pure a
-foldHVec (HCons fa) = Free (foldHVec <$> fa)
+onionToFree :: Functor f => Onion n f a -> Free f a
+onionToFree (Core a) = Pure a
+onionToFree (Layer fa) = Free (onionToFree <$> fa)
