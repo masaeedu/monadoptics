@@ -1,7 +1,7 @@
 # monadoptics
 
 ## Description
-Experiment with using profunctor optics (NB: not `Profunctor` optics!) to adjust the effect layers of monadic computations
+Experiment with using profunctor optics (NB: not `Profunctor` optics!) to adjust the effect layers of monadic computations. Not a usable library, but the concepts might be interesting to folks working on effect systems and the like. I recommend looking through the README below (including the aside if interested in the guts), then looking through the code (which might be slightly out of sync with the README in naming conventions etc.).
 
 ## Examples
 
