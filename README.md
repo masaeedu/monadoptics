@@ -149,9 +149,11 @@ class Functor f => Applicative f
   liftA2 :: ((a, b) -> c) -> ((f a, f b) -> f c)
 ```
 
-So there is an analogy between lists (the free "monoid of tupling") and the free monad (the free "monoid of layering"). There is also the fact that lists are traversable "with respect to tupling". Might it be the case that the free monad is traversable "with respect to layering"?
+So there is an analogy between lists (the free "monoid of tupling") and the free monad (the free "monoid of layering").
 
-To answer this question, we must cook up a class that represents the analogous of traversability with respect to layering. In turn, this task demands that we find an appropriate substitute for the `Applicative` typeclass `Traversable` refers to. What `Applicative` is to tupling, the new class must be to layering.
+Since lists are traversable "with respect to tupling", might it be the case that the free monad is traversable "with respect to layering"?
+
+To answer this question, we must cook up a class analogous to `Traversable` that represents traversability with respect to layering. In turn, this task demands that we find an appropriate substitute for the `Applicative` typeclass `Traversable` refers to. What `Applicative` is to tupling, the new class must be to layering.
 
 Let's first remember that what we are layering is functors `* -> *`, whereas what we tuple is proper types `*`. Keeping this in mind, here is an appropriately "elevated" substitute for the `Functor` superclass of `Applicative`:
 
@@ -190,15 +192,15 @@ Once again, you might notice here how this rhymes with the type of `traverse`.
 
 So finally we ask ourselves: is `Free :: (* -> *) -> * -> *` `Descendable` in the functor layers it "contains"? And the answer is yes (look through the codebase for the implementation).
 
-An example of a `Composeative` monad transformer we might consider is `StateT s :: (* -> *) -> * -> *`. One useful specialization of `descend` might be:
+An example of a `Composeative` monad transformer we might consider is `StateT s :: (* -> *) -> * -> *`. Thus one useful specialization of `descend` might be:
 
 ```hs
 descend :: (f ~> StateT s f) -> Free f ~> StateT s (Free f)
 ```
 
-This allows us to splice access to state into each layer of our computation `Free f a`, and end up with a stateful computation of the form `s -> Free f (a, s)`. The overall computation depends on an initial state, and terminates with a result and a final state.
+This allows us to splice access to state into each layer of our computation `Free f a`, and end up with a stateful computation of the form `s -> Free f (a, s)`. The overall computation depends on an initial state, and terminates with a result and a final state, having evaluated all state transitions grafted onto the intermediate layers.
 
-I suspect (but haven't had the time or motivation to investigate) that a lot of the monad transformers we work with day to day are `Composeative`, or at the very least support an instance of a class similar to `Composeative` with heavier constraints than `Functor`.
+I suspect (but haven't had the time or motivation to extensively investigate) that a lot of the monad transformers we work with day to day are `Composeative`, or at the very least support an instance of a class similar to `Composeative` with heavier constraints than `Functor`.
 
 #### Traversables and traversals, descendables and descents
 In many profunctor optics library we have a notion of "traversals" (which represent a generalization of traversable instances) [5]:
@@ -225,12 +227,16 @@ Because of various issues with higher rank quantification and impredicativity th
 One way to think about `FunList`/`Bazaar` is that the `Traversable` typeclass is equivalent to:
 
 ```hs
-class Functor t => Traversable' t
+class Functor t => Traversable t
   where
+  traverse :: Applicative f => t a -> (a -> f b) -> f (t b)
+  -- which is the same as
   traverse :: t a -> Bazaar a b (t b)
-  -- or
+  -- which is the same as
   traverse :: t a -> FunList a b (t b)
 ```
+
+Ok, good, so we know what the profunctor constraint for traversals is (`Traversing`), and we know a slight simplification of it (swap `Bazaar` for `FunList`). Let's find the appropriate "tupling to layering substitute" for `FunList` first.
 
 By a sequence of reasoning that I won't get into here [7], I believe that what `FunList` is to tupling, the following `OnionList` is to layering:
 
@@ -252,7 +258,9 @@ data OnionList a b t x
   OnionList :: Onion n a r -> (Onion n b r -> t x) -> OnionList a b t x
 ```
 
-We're almost there, I promise. Now to our equivalent of the `Traversing` profunctor class, which we imaginatively call `Descending`. First we need a higher order profunctor typeclass:
+Great, we know how to swap out the `Bazaar`/`FunList` now. Now to our equivalent of the `Traversing` profunctor class, which we imaginatively call `Descending`.
+
+First we need a higher order profunctor typeclass:
 
 ```hs
 class HProfunctor (p :: (* -> *) -> (* -> *) -> *)
@@ -260,7 +268,7 @@ class HProfunctor (p :: (* -> *) -> (* -> *) -> *)
   hdimap :: (a' ~> a) -> (b ~> b') -> p a b -> p a' b'
 ```
 
-Here is `Descending`, for which hopefully the similarities with `Traversing` are readily apparent:
+Here is its subclass `Descending`, for which hopefully the similarities with `Traversing` are readily apparent:
 
 ```hs
 class HProfunctor p => Descending p
