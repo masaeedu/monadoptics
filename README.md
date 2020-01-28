@@ -203,7 +203,7 @@ This allows us to splice access to state into each layer of our computation `Fre
 I suspect (but haven't had the time or motivation to extensively investigate) that a lot of the monad transformers we work with day to day are `Composeative`, or at the very least support an instance of a class similar to `Composeative` with heavier constraints than `Functor`.
 
 #### Traversables and traversals, descendables and descents
-In many profunctor optics library we have a notion of "traversals" (which represent a generalization of traversable instances) [5]:
+In profunctor optics libraries we have a notion of "traversals" (which represent a generalization of traversable instances) [5]:
 
 ```hs
 type Bazaar a b t = forall f. Applicative f => (a -> f b) -> f t
