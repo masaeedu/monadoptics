@@ -340,7 +340,7 @@ _1 :: HLens ((,) a) ((,) b) (Const a) (Const b)
 Composing all of these, we have the optic:
 
 ```hs
-each . _Push . _1 :: (HStrong p, HChoice p, HDescending p) => HOptic' (Free StackF) (Const Int)
+each . _Push . _1 :: (HStrong p, HChoice p, HDescending p) => HOptic' p (Free StackF) (Const Int)
 ```
 
 Since `~>` supports instances of all these typeclasses, this optic can be used as a setter, meaning we can specialize this to:
