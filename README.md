@@ -258,7 +258,7 @@ data OnionList a b t x
   OnionList :: Onion n a r -> (Onion n b r -> t x) -> OnionList a b t x
 ```
 
-Great, we know how to swap out the `Bazaar`/`FunList` now. Now to our equivalent of the `Traversing` profunctor class, which we imaginatively call `Descending`.
+Great, so now we know how to swap out the `Bazaar`/`FunList`. Now to our equivalent of the `Traversing` profunctor class, which we imaginatively call `Descending`.
 
 First we need a higher order profunctor typeclass:
 
@@ -276,7 +276,7 @@ class HProfunctor p => Descending p
   spelunk :: (Functor s, Functor t, Functor a, Functor b) => (s ~> OnionList a b t) -> (p a b -> p s t)
 ```
 
-And FINALLY we come to the point. Just as in "ground floor" profunctors we have traversals to generalize the `traverse` operation of traversable containers, in our monad optics library we have descents to generalize `descend`:
+And FINALLY we come to the point. Just as in "ground floor" profunctor optics we have traversals to generalize the `traverse` operation of traversable containers, in our monad optics library we have descents to generalize `descend`:
 
 ```hs
 type Descent s t a b = forall p. Descending p => p a b -> p s t
