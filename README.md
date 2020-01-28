@@ -183,9 +183,9 @@ Ignoring the functor constraints, perhaps you can see the analogy to the types o
 Now we can return to traversability in layers. Here is a `Descendable` typeclass that shows what it means for a functor transformer to be traversable in the layers it "contains":
 
 ```hs
-class HFunctor d => Descendable d
+class HFunctor t => Descendable t
   where
-  descend :: (Composeative c, Functor f, Functor g) => (f ~> c g) -> (d f ~> c (d g))
+  descend :: (Composeative f, Functor a, Functor b) => (a ~> f b) -> (t a ~> f (t b))
 ```
 
 Once again, you might notice here how this rhymes with the type of `traverse`.
