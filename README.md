@@ -355,7 +355,7 @@ test = do
   x <- newIORef []
 
   let pushes = each . _Push . _1
-  let calc' = calc & pushes %~ (* 2)
+  let calc' = calc & pushes %~ (* 2) -- Lucky for us, @Num x => Num (Const x)@!
 
   runStack calc' ^. inIORef x
   -- > Push 6
