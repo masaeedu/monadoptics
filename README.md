@@ -192,7 +192,7 @@ So finally we ask ourselves: is `Free :: (* -> *) -> * -> *` `Descendable` in th
 
 An example of a `Composeative` monad transformer we might consider is `StateT s :: (* -> *) -> * -> *`. One useful specialization of `descend` might be:
 
-```
+```hs
 descend :: (f ~> StateT s f) -> Free f ~> StateT s (Free f)
 ```
 
@@ -224,7 +224,7 @@ Because of various issues with higher rank quantification and impredicativity th
 
 One way to think about `FunList`/`Bazaar` is that the `Traversable` typeclass is equivalent to:
 
-```
+```hs
 class Functor t => Traversable' t
   where
   traverse :: t a -> Bazaar a b (t b)
@@ -313,37 +313,37 @@ And this at last is the magic that enables the code snippet that follows. [8] [9
 
 We have the following "descent" for digging into the functor layers of a `Free` computation:
 
-```
+```hs
 each :: (Functor a, Functor b) => Descent (Free a) (Free b) a b
 ```
 
 We can also create a prism for focusing into the `Push` case of our `StackF` coproduct:
 
-```
+```hs
 _Push :: HPrism' StackF ((,) Int)
 ```
 
 And finally we have a lens for focusing onto the contents of that tuple:
 
-```
+```hs
 _1 :: HLens ((,) a) ((,) b) (Const a) (Const b)
 ```
 
 Composing all of these, we have the optic:
 
-```
+```hs
 each . _Push . _1 :: (HStrong p, HChoice p, HDescending p) => HOptic' (Free StackF) (Const Int)
 ```
 
 Since `~>` supports instances of all these typeclasses, this optic can be used as a setter, meaning we can specialize this to:
 
-```
+```hs
 each . _Push . _1 :: (Const Int ~> Const Int) -> (Free StackF ~> Free StackF)
 ```
 
 We can use the traditional infix convenience for this:
 
-```
+```hs
 (%~) :: HSetter s t a b -> (a ~> b) -> s ~> t
 ```
 
