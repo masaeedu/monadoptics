@@ -46,7 +46,7 @@ PS: Having the original computation actually depend on `MonadIO` isn't necessary
 
 Let's say we're using the free monad of a functor to model computations on a stack:
 
-```
+```hs
 data StackF k
   = Push Int k
   | Top (Int -> k)
@@ -56,7 +56,7 @@ data StackF k
 
 type Stack = Free StackF
 
--- ... boilerplate
+-- ... @Free@ boilerplate
 ```
 
 Here is a sample computation:
