@@ -1,6 +1,8 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module Classes where
 
+import Data.Functor.Const
+
 import Types
 
 class KnownNat n
@@ -10,6 +12,20 @@ class KnownNat n
 class HProfunctor p
   where
   hdimap :: (a' ~> a) -> (b ~> b') -> p a b -> p a' b'
+
+class HBifunctor p
+  where
+  hbimap :: (a ~> a') -> (b ~> b') -> p a b -> p a' b'
+
+class HContrabifunctor p
+  where
+  hcontrabimap :: (a' ~> a) -> (b' ~> b) -> p a b -> p a' b'
+
+hmap :: (HProfunctor p, HBifunctor p) => (b ~> b') -> p a b -> p a' b'
+hmap f = hdimap (const $ Const ()) f . hbimap (const $ Const ()) id
+
+hcontramap :: (HProfunctor p, HContrabifunctor p) => (a' ~> a) -> p a b -> p a' b'
+hcontramap f = hcontrabimap id (const $ Const ()) . hdimap f (const $ Const  ())
 
 class HProfunctor p => HStrong p
   where
@@ -38,6 +54,10 @@ class HProfunctor p => HRightComposing p
 class HProfunctor p => HDescending p
   where
   hspelunk :: (Functor s, Functor t, Functor a, Functor b) => (s ~> HFunList a b t) -> (p a b -> p s t)
+
+class HMapping p
+  where
+  hmapped :: HHFunctor f => p n m -> p (f n) (f m)
 
 class HHFunctor f
   where
