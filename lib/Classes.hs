@@ -11,16 +11,20 @@ class HProfunctor p
   where
   hdimap :: (a' ~> a) -> (b ~> b') -> p a b -> p a' b'
 
-class HProfunctor p => HStrong p where
+class HProfunctor p => HStrong p
+  where
   hfirst :: p f g -> p (f :*: h) (g :*: h)
 
-class HProfunctor p => HCostrong p where
+class HProfunctor p => HCostrong p
+  where
   hunfirst :: p (f :*: h) (g :*: h) -> p f g
 
-class HProfunctor p => HChoice p where
+class HProfunctor p => HChoice p
+  where
   hleft :: p f g -> p (f :+: h) (g :+: h)
 
-class HProfunctor p => HCochoice p where
+class HProfunctor p => HCochoice p
+  where
   hunleft :: p (f :+: h) (g :+: h) -> p f g
 
 class HProfunctor p => HLeftComposing p
