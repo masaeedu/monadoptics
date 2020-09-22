@@ -1,38 +1,38 @@
 {
-    "all-hies": {
-        "branch": "master",
-        "description": "Cached Haskell IDE Engine Nix builds for all GHC versions",
-        "homepage": "",
-        "owner": "Infinisil",
-        "repo": "all-hies",
-        "rev": "315936fe4da48c774601a2c4eaba72f8dc4e5fdb",
-        "sha256": "18s9gyd19sd0b9jlax06mmlrlrbdaksim2x7hhq64q7amcc3h8kj",
-        "type": "tarball",
-        "url": "https://github.com/Infinisil/all-hies/archive/315936fe4da48c774601a2c4eaba72f8dc4e5fdb.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    },
-    "niv": {
-        "branch": "master",
-        "description": "Easy dependency management for Nix projects",
-        "homepage": "https://github.com/nmattia/niv",
-        "owner": "nmattia",
-        "repo": "niv",
-        "rev": "1dd094156b249586b66c16200ecfd365c7428dc0",
-        "sha256": "1b2vjnn8iac5iiqszjc2v1s1ygh0yri998c0k3s4x4kn0dsqik21",
-        "type": "tarball",
-        "url": "https://github.com/nmattia/niv/archive/1dd094156b249586b66c16200ecfd365c7428dc0.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    },
-    "nixpkgs": {
-        "branch": "nixos-19.03",
-        "description": "A read-only mirror of NixOS/nixpkgs tracking the released channels. Send issues and PRs to",
-        "homepage": "https://github.com/NixOS/nixpkgs",
-        "owner": "NixOS",
-        "repo": "nixpkgs-channels",
-        "rev": "021d733ea3f87b8c9232020b4e606d08eaca160b",
-        "sha256": "13600nzrakvg2hsfg5yr7x0jp9m762nvjyddf07q60d3m7vx9jxy",
-        "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs-channels/archive/021d733ea3f87b8c9232020b4e606d08eaca160b.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    }
+  "all-hls": {
+    "branch": "master",
+    "description": null,
+    "homepage": "",
+    "owner": "masaeedu",
+    "repo": "all-hls",
+    "rev": "643cfcb07a724c31464f969320faee4df4931b10",
+    "sha256": "1wxmz4iqmyazwfyzwc0s0dkvxyk2c7c7qllbx2yyn6kj1dj3p0ay",
+    "type": "tarball",
+    "url": "https://github.com/masaeedu/all-hls/archive/643cfcb07a724c31464f969320faee4df4931b10.tar.gz",
+    "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+  },
+  "iohk-hnix": {
+    "branch": "master",
+    "description": "Alternative Haskell Infrastructure for Nixpkgs",
+    "homepage": "https://input-output-hk.github.io/haskell.nix",
+    "owner": "input-output-hk",
+    "repo": "haskell.nix",
+    "rev": "32baaac4d7858ae3349c1f6d1452371f998c7f49",
+    "sha256": "0g0jh0jwips3qyxs7rb1d4qvqs6rralnq318x5x2wvy1mkzvxvlg",
+    "type": "tarball",
+    "url": "https://github.com/input-output-hk/haskell.nix/archive/32baaac4d7858ae3349c1f6d1452371f998c7f49.tar.gz",
+    "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+  },
+  "niv": {
+    "branch": "master",
+    "description": "Easy dependency management for Nix projects",
+    "homepage": "https://github.com/nmattia/niv",
+    "owner": "nmattia",
+    "repo": "niv",
+    "rev": "e82eb322ea32a747a51c431d7787221bcc6d9038",
+    "sha256": "1fy4dcr05d80diwlxmh42xnjm5ki1pkbky38smvlqjaky2y2f71f",
+    "type": "tarball",
+    "url": "https://github.com/nmattia/niv/archive/e82eb322ea32a747a51c431d7787221bcc6d9038.tar.gz",
+    "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+  }
 }

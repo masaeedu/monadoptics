@@ -1,0 +1,49 @@
+spec-version: 0.30.0
+name: monadoptics
+author: Asad Saeeduddin
+maintainer: masaeedu@gmail.com
+license: MIT
+
+build-type: Simple
+
+dependencies:
+- { name: "base", version: '>=4.13 && <4.14' }
+- mtl
+- free
+- comonad
+
+ghc-options: -Wall
+default-extensions:
+- GADTs
+
+- StandaloneDeriving
+- DeriveFunctor
+- DerivingVia
+- GeneralizedNewtypeDeriving
+
+- ScopedTypeVariables
+- RankNTypes
+- QuantifiedConstraints
+
+- TypeApplications
+- TypeOperators
+- MultiParamTypeClasses
+
+- ConstraintKinds
+- DataKinds
+- PolyKinds
+- KindSignatures
+
+- UndecidableInstances
+- FlexibleInstances
+- FlexibleContexts
+- DefaultSignatures
+
+library:
+  source-dirs: lib
+
+executable:
+  source-dirs: app
+  main: Main.hs
+  dependencies:
+  - monadoptics
