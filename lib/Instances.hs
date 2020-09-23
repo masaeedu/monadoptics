@@ -98,6 +98,14 @@ instance HProfunctor p => HProfunctor (HReverse p s t)
   where
   hdimap f g (HReverse r) = HReverse (r . hdimap g f)
 
+instance HProfunctor Bikleisli
+  where
+  hdimap f g (Bikleisli k) = Bikleisli $ g . k . f
+
+instance HProfunctor Tagged
+  where
+  hdimap _ g (Tagged (Bikleisli k)) = Tagged $ Bikleisli $ g . k
+
 -- HHThings
 instance HHFunctor Free
   where

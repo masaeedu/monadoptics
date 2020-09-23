@@ -9,8 +9,10 @@ build-type: Simple
 dependencies:
 - { name: "base", version: '>=4.13 && <4.14' }
 - mtl
+- transformers
 - free
 - comonad
+- bifunctors
 
 ghc-options: -Wall
 default-extensions:
@@ -28,6 +30,7 @@ default-extensions:
 - TypeApplications
 - TypeOperators
 - MultiParamTypeClasses
+- TypeFamilies
 
 - ConstraintKinds
 - DataKinds
@@ -38,6 +41,8 @@ default-extensions:
 - FlexibleInstances
 - FlexibleContexts
 - DefaultSignatures
+
+- TupleSections
 
 library:
   source-dirs: lib

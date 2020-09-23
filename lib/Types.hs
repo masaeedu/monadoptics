@@ -1,5 +1,6 @@
 module Types where
 
+import Data.Functor.Const
 import Data.Functor.Compose
 
 type F = (* -> *)
@@ -50,3 +51,7 @@ data HCLens a b s t = HCLens { v :: s ~> a, p :: (b `Product` s) ~> t }
 data HReverse :: HP -> F -> F -> HP
   where
   HReverse :: { runRe :: p b a -> p t s } -> HReverse p s t a b
+
+newtype Bikleisli n m = Bikleisli { runBikleisli :: forall x. n x -> m x }
+
+newtype Tagged n m = Tagged { runTagged :: Bikleisli (Const ()) m }

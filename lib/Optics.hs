@@ -2,6 +2,8 @@
 
 module Optics where
 
+import GHC.Exts
+
 import Unsafe.Coerce
 
 import Data.IORef
@@ -134,3 +136,15 @@ _1 = hlens (Const . uncurry const) (\(Product (Const b, (_, x))) -> (b, x))
 (^.) = flip hview
 
 infixr 4 %~, ^.
+
+type Parametric f = (forall a b. Coercible a b => Coercible (f a) (f b) :: Constraint)
+type CoercibleF f g = (forall x. Coercible (f x) (g x) :: Constraint)
+
+hcoerce :: forall s t a b. (CoercibleF s a, CoercibleF b t) => HIso s t a b
+hcoerce = hdimap coerce coerce
+
+_1' :: forall x a b p. (Inside p x, Functor a, Functor b, HLeftComposing p) => HOptic p (a :.: x) (b :.: x) a b
+_1' = houtside
+
+_2' :: forall x a b p. (Outside p x, Functor a, Functor b, HRightComposing p) => HOptic p (x :.: a) (x :.: b) a b
+_2' = hinside
