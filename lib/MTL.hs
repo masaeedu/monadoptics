@@ -2,6 +2,7 @@ module MTL where
 
 import Data.Functor.Compose (Compose(..))
 
+import Data.Bifunctor (first)
 import Data.Bifunctor.Flip (Flip(..))
 import Data.Monoid (Endo(..))
 
@@ -53,10 +54,10 @@ import Optics (Parametric, HOptic, hcoerce, _1', _2')
 
 -- Hence we will have:
 
-newtype Write  w m n = Write  { getWrite  :: forall x. (w, x) -> n x        }
+newtype Write  w m n = Write  { getWrite  :: forall x. (x, w) -> n x        }
 newtype Tell   w m n = Tell   { getTell   ::           w -> n ()            }
-newtype Listen w m n = Listen { getListen :: forall x. m x -> n (w, x)      }
-newtype Pass   w m n = Pass   { getPass   :: forall x. m (Endo w, x) -> n x }
+newtype Listen w m n = Listen { getListen :: forall x. m x -> n (x, w)      }
+newtype Pass   w m n = Pass   { getPass   :: forall x. m (x, w -> w) -> n x }
 
 -- And then we will glue them all together into a dictionary like so:
 
@@ -172,7 +173,7 @@ ourGoal :: (Functor m, Functor n) => HOptic (Listen w) (ExceptT e m) (ExceptT e 
 -- Without referring to any abstractions for the moment, let's just try implementing the concrete combination where
 -- we promote the `listen` operation for the `ExceptT` transformer.
 
-ourGoal (Listen l) = Listen $ ExceptT . fmap (\(w, fa) -> fmap (w,) fa) . l . runExceptT
+ourGoal (Listen l) = Listen $ ExceptT . fmap (\(fa, w) -> fmap (, w) fa) . l . runExceptT
 
 -- So far so good. Now if we forget about `listen` specifically, we can try and imagine what we need from a `listen`-like
 -- operation in order to be able to promote it over `ExceptT`.
@@ -216,12 +217,12 @@ abstractlyPromoteOverExceptT' =
 
 -- As we would expect, the relevant bits from the `listen`-specific implementation factor out into an instance of this class:
 
-lstrength :: Functor f => (a, f b) -> f (a, b)
-lstrength (a, fb) = fmap (a,) fb
+rstrength :: Functor f => (f a, b) -> f (a, b)
+rstrength (fa, b) = fmap (, b) fa
 
 instance HLeftComposing (Listen w)
   where
-  houtside (Listen l) = Listen $ Compose . fmap lstrength . l . getCompose
+  houtside (Listen l) = Listen $ Compose . fmap rstrength . l . getCompose
 
 -- Unlike tupling, functor composition is not symmetric. While there is an isomorphism `(a , b) ≅ (b , a)`, there is no analogous
 -- isomorphism in general between `a :.: b` and `b :.: a`. So while `first'` and `second'` are equivalent minimal definitions in a
@@ -248,7 +249,14 @@ instance HRightComposing (Listen w)
 instance HLeftComposing (Pass w)
   where
   type Inside (Pass w) = Traversable
-  houtside (Pass f) = Pass $ Compose . f . fmap sequenceA . getCompose
+  houtside (Pass f) = Pass $ Compose . f . fmap annoyingSequenceA . getCompose
+    where
+    swap :: (a, b) -> (b, a)
+    swap (a, b) = (b, a)
+
+    annoyingSequenceA :: Traversable f => f (a, w -> w) -> (f a, w -> w)
+    annoyingSequenceA = swap . first appEndo . traverse (first Endo . swap)
+
 
 instance HRightComposing (Pass w)
   where
