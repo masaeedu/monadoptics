@@ -117,45 +117,44 @@ instance HBifunctor (Tell w)
 
 -- hmap :: (HBifunctor p, HProfunctor p) => (b ~> b') -> p a b -> p a' b'
 
--- Using this operation, we can now abstract over all possible "liftings" of the tell and writer operations over a type constructor that
--- witnesses `MonadTrans`:
+-- We can use `hmap` to generically `lift` the occurrences of a monad in an operation signature that only refers to it in positive position.
 
 liftOp :: (MonadTrans f, Monad a, Monad b, HProfunctor p, HBifunctor p) => p a b -> p (f a) (f b)
 liftOp = hmap lift
 
--- Where there are profunctors, there are optics. The eagle-eyed reader might have noticed that the previous definition is actually a
--- profunctor optic:
+-- Now we can take the `write` and `tell` of an arbitrary monad, and promote them to implementations of `write` and `tell` for an arbitrary
+-- transformation of that monad. Moreover, the promotion process is fully generalized, and no longer cares about the shape of the operation
+-- (provided you have witnessed `HProfunctor` and `HBifunctor`).
+
+-- To convince you that the single definition above works for all six combinations of `write`, `tell` with the transformers `ExceptT`, `ReaderT`, `StateT`
+
+writeExcept :: (Monad m, Monad n) => Write w m n -> Write w (ExceptT e m) (ExceptT e n)
+writeExcept = liftOp
+
+tellExcept :: (Monad m, Monad n) => Tell w m n -> Tell w (ExceptT e m) (ExceptT e n)
+tellExcept = liftOp
+
+writeReader :: (Monad m, Monad n) => Write w m n -> Write w (ReaderT r m) (ReaderT r n)
+writeReader = liftOp
+
+tellReader :: (Monad m, Monad n) => Tell w m n -> Tell w (ReaderT r m) (ReaderT r n)
+tellReader = liftOp
+
+writeState :: (Monad m, Monad n) => Write w m n -> Write w (StateT s m) (StateT s n)
+writeState = liftOp
+
+tellState :: (Monad m, Monad n) => Tell w m n -> Tell w (StateT s m) (StateT s n)
+tellState = liftOp
+
+-- Where there are profunctors, there are optics. The eagle-eyed reader might notice that the previous definitions are actually examples of profunctor optics:
 
 -- type HOptic p s t a b = p a b -> p s t
 -- type HReview  s t a b = forall p. (HProfunctor p, HBifunctor p) => p a b -> p s t
 
 -- liftOp :: (MonadTrans f, Monad a, Monad b) => HReview (f a) (f b) a b
 
--- Now we can take the `write` and `tell` of an arbitrary monad, and promote them to implementations of `write` and `tell` for an arbitrary
--- transformation of that monad
-
--- Moreover, the promotion process is fully generalized, and no longer cares about the shape of the operation (provided you have witnessed
--- `HProfunctor` and `HBifunctor`).
-
--- Thus the implementation simply consists of us yelling the magic incantation "lift op!" repeatedly
-
-writeExcept :: (Monad m, Monad n) => HOptic (Write w) (ExceptT e m) (ExceptT e n) m n
-writeExcept = liftOp
-
-tellExcept :: (Monad m, Monad n) => HOptic (Tell w) (ExceptT e m) (ExceptT e n) m n
-tellExcept = liftOp
-
-writeReader :: (Monad m, Monad n) => HOptic (Write w) (ReaderT r m) (ReaderT r n) m n
-writeReader = liftOp
-
-tellReader :: (Monad m, Monad n) => HOptic (Tell w) (ReaderT r m) (ReaderT r n) m n
-tellReader = liftOp
-
-writeState :: (Monad m, Monad n) => HOptic (Write w) (StateT s m) (StateT s n) m n
-writeState = liftOp
-
-tellState :: (Monad m, Monad n) => HOptic (Tell w) (StateT s m) (StateT s n) m n
-tellState = liftOp
+-- Profunctor optics will keep cropping up in the ensuing discussion. In some cases we might explicitly write `P a b -> P s t` instead of using the type
+-- synonym `HOptic`, so keep an eye out.
 
 -- So far so good. The ease with which we dealt with the covariant operations leads one to wonder what the point of the weird `n` `m` parameter split
 -- is in the first place. Surely we can dispense with the "phantom" profunctor in favor of a simple covariant functor?
@@ -163,8 +162,7 @@ tellState = liftOp
 -- Unfortunately, unlike `write` and `tell`, some operations are in the habit of eating up a term in an effectful context in addition to producing one.
 -- These operations not phantom in their negative type parameter, and so we cannot witness an HBifunctor for them.
 
--- Thus we must give up our habit of shouting `liftOp` at various monad transformers. To deal with `listen` and `pass`, both of which refer to the
--- negative `n` type variable, we must come up with a new technique.
+-- Thus we must give up our habit of shouting `liftOp` at various monad transformers, and come up with new tools to deal with `listen` and `pass`.
 
 -- Let's first state what our goal is:
 
@@ -181,13 +179,13 @@ ourGoal (Listen l) = Listen $ ExceptT . fmap (\(w, fa) -> fmap (w,) fa) . l . ru
 -- To start with, we'll need at least an HProfunctor, so that we can unwrap and rewrap `ExceptT` at the edges, as seen in the concrete implementation above.
 
 -- Since we can only map an `HProfunctor` using natural transformations, we need to unpack `ExceptT e m a` into something of the form `??? a`. `ExceptT e m a`
--- is the same as `m (Either e a)`. In order to unify it with `??? a`, we can use the `Compose` newtype to get `Compose m (Either e) a`.
+-- unpacks into `m (Either e a)`. In order to unify it with `??? a`, we can use the `Compose` newtype to get `Compose m (Either e) a`.
 
 abstractlyPromoteOverExceptT :: (Functor m, Functor n, HProfunctor p) => HOptic p (ExceptT e m) (ExceptT e n) m n
 abstractlyPromoteOverExceptT =
   hdimap (Compose . runExceptT) (ExceptT . getCompose) . undefined
 
--- The type of the missing piece is:
+-- The type of the missing piece is now:
 
 -- ??? :: HOptic p (m :.: Either e) (n :.: Either e) m n
 
@@ -195,12 +193,12 @@ abstractlyPromoteOverExceptT =
 
 -- If you're familiar with the `Strong` typeclass from regular profunctor optics, you might see the parallel with:
 
--- first' :: Strong p => Optic p (a, x) (b, x) a b
+-- first' :: Strong p => Optic p (m, x) (n, x) m n
 
--- The operation we want is essentially like `first`, but with kind `* -> *` instead of kind `*`, and functor
--- composition instead of tupling.
+-- The operation we want is essentially like `first`, but with type variables of kind `* -> *` instead of kind `*`, and functor
+-- composition taking the place of tupling.
 
--- Thus we have a subclass of `HProfunctor`:
+-- We will call the requisite subclass of `HProfunctor` "HLeftComposing":
 
 -- class HProfunctor p => HLeftComposing p
 --   where
@@ -209,7 +207,7 @@ abstractlyPromoteOverExceptT =
 --
 --   houtside :: (Functor m, Functor n, Inside p x) => HOptic p (m :.: x) (n :.: x) m n
 
--- Now that we've postulated the missing piece, we can complete the puzzle:
+-- Having postulated the missing piece using an additional constraint, we can complete the puzzle:
 
 abstractlyPromoteOverExceptT' :: (Functor m, Functor n, Inside p (Either e), HLeftComposing p) => HOptic p (ExceptT e m) (ExceptT e n) m n
 abstractlyPromoteOverExceptT' =
@@ -225,10 +223,11 @@ instance HLeftComposing (Listen w)
   houtside (Listen l) = Listen $ Compose . fmap lstrength . l . getCompose
 
 -- Unlike tupling, functor composition is not symmetric. While there is an isomorphism `(a , b) ≅ (b , a)`, there is no analogous
--- isomorphism between `a :.: b` and `b :.: a`. So while `first'` and `second'` are equivalent minimal definitions in a single
--- class, we cannot derive an `hinside :: HOptic p (x :.: m) (x :.: n) m n` from `houtside`, and vice versa.
+-- isomorphism in general between `a :.: b` and `b :.: a`. So while `first'` and `second'` are equivalent minimal definitions in a
+-- single `Strong` class, when it comes to functor composition we will need a separate class for the reverse notion of focusing on
+-- a functor on the "inside" of a functor composition.
 
--- Thus we need a separate class for `hinside`:
+-- Enter `HRightComposing` and its operation `hinside`:
 
 -- class HProfunctor p => HRightComposing p
 --   where
@@ -254,10 +253,13 @@ instance HRightComposing (Pass w)
   where
   hinside (Pass p') = Pass $ Compose . fmap p' . getCompose
 
--- We've now decoupled the set of instances from the set of operations. For each monad transformer, we need only to implement optics that focus on the
--- inner monad, and refer to `HProfunctor` and any necessary subclasses (as opposed to any specific `MonadXYZ` operations).
+-- We've now decoupled the set of instances from the set of operations. The broad idea is this: for each monad transformer, we need to implement an
+-- optic that focuses on its inner monad. The optic should be abstract, and should refer to `HProfunctor` and any necessary subclasses instead of
+-- any specific `MonadXYZ` operations.
 
--- For clarity, we will ignore the scattered bits and pieces in the preceding discussion, and implement each transformer's optic from whole cloth below:
+-- For clarity, we will ignore the scattered bits and pieces we've already defined in the preceding discussion, and implement each transformer's optic
+-- from whole cloth below. In what follows `_1'` and `_2'` are respectively aliases for `houtside` and `hinside`, just quantified for more convenient
+-- type application:
 
 focusExceptT :: forall e m n p.
   ( Functor m
@@ -290,7 +292,7 @@ focusStateT :: forall s m n p.
   HOptic p (StateT s m) (StateT s n) m n
 focusStateT = hcoerce . _2' @((->) s) . _1' @(Flip (,) s)
 
--- For the operations themselves, we need to witness instances of `HProfunctor` and any instantiable subclasses. Given a monad transformer whose optic demands
+-- For the operations themselves, we just need to witness instances of `HProfunctor` and any instantiable subclasses. Given a monad transformer whose optic demands
 -- constraints satisfied by an operation, we can specialize the optic to the operation. The result is a function that takes an instance of the operation for the
 -- inner monad, and produces an instance of the operation for the transformed monad.
 
