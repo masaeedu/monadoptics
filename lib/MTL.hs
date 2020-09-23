@@ -15,7 +15,8 @@ import Optics (Parametric, HOptic, hcoerce, _1', _2')
 
 -- We want to solve the n × m instances problem in MTL, where:
 -- - Adding a new class necessitates writing "lifting" instances for each existing transformer (often with manual finagling in the negative positions)
--- - Adding a new transformer necessitates witnessing "lifting" instances for every class (again, often with special logic for operations that refer to the monad in the negative position)
+-- - Adding a new transformer necessitates witnessing "lifting" instances for every class (again, often with special logic for operations that refer to
+--   the monad in the negative position)
 
 -- As a case study, we will look at the MonadWriter class:
 
@@ -32,7 +33,7 @@ import Optics (Parametric, HOptic, hcoerce, _1', _2')
 -- - StateT
 
 -- First we will fix the problem of "negative" positions. The mixed variance of the `m` parameter in various MonadXYZ classes makes
--- things confusing. To address this, we will introduce two separate parameters, a "negative" n variable and a "positive" m variable.
+-- things confusing. To address this, we will introduce two separate parameters, a "negative" m variable and a "positive" n variable.
 
 -- Moreover, in order to understand the structure of the problem more easily, we will treat the evidence corresponding to the class as
 -- a simple datatype (i..e we will "scrap our typeclasses").
@@ -41,10 +42,10 @@ import Optics (Parametric, HOptic, hcoerce, _1', _2')
 
 -- data MonadWriter w m n
 --   = MonadWriter
---   { write  :: forall a. (a, w) -> m a
---   , tell   :: w -> m ()
---   , listen :: forall a. n a -> m (a, w)
---   , pass   :: m (a, w -> w) -> m a
+--   { write  :: forall a. (a, w) -> n a
+--   , tell   ::           w -> n ()
+--   , listen :: forall a. m a -> n (a, w)
+--   , pass   :: forall a. m (a, w -> w) -> n a
 --   }
 
 -- However, in order to futher zoom in on and understand the behavior of the different operations, we will treat each operation in the
@@ -53,7 +54,7 @@ import Optics (Parametric, HOptic, hcoerce, _1', _2')
 -- Hence we will have:
 
 newtype Write  w m n = Write  { getWrite  :: forall x. (w, x) -> n x        }
-newtype Tell   w m n = Tell   { getTell   :: w -> n ()                      }
+newtype Tell   w m n = Tell   { getTell   ::           w -> n ()            }
 newtype Listen w m n = Listen { getListen :: forall x. m x -> n (w, x)      }
 newtype Pass   w m n = Pass   { getPass   :: forall x. m (Endo w, x) -> n x }
 
